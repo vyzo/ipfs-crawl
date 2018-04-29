@@ -12,6 +12,7 @@ import (
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 	peer "github.com/libp2p/go-libp2p-peer"
 	pstore "github.com/libp2p/go-libp2p-peerstore"
+	swarm "github.com/libp2p/go-libp2p-swarm"
 )
 
 const WORKERS = 16
@@ -133,7 +134,7 @@ func (c *Crawler) worker() {
 			if !ok {
 				return
 			}
-			// add a bit of delay to avoid dial backoffs
+			// add a bit of delay to avoid connection storms
 			dt := mrand.Intn(60000)
 			time.Sleep(time.Duration(dt) * time.Millisecond)
 			c.tryConnect(pi)
@@ -147,13 +148,30 @@ func (c *Crawler) worker() {
 func (c *Crawler) tryConnect(pi pstore.PeerInfo) {
 	log.Printf("Connecting to %s (%d)", pi.ID.Pretty(), len(pi.Addrs))
 
-	ctx, cancel := context.WithTimeout(c.ctx, 60*time.Second)
-	defer cancel()
+	backoff := 0
+	var ctx context.Context
+	var cancel func()
+
+again:
+	ctx, cancel = context.WithTimeout(c.ctx, 60*time.Second)
 
 	err := c.h.Connect(ctx, pi)
-	if err != nil {
+	cancel()
+
+	switch {
+	case err == swarm.ErrDialBackoff:
+		backoff++
+		if backoff < 7 {
+			dt := 1000 + mrand.Intn(backoff*10000)
+			log.Printf("Backing off dialing %s", pi.ID.Pretty())
+			time.Sleep(time.Duration(dt) * time.Millisecond)
+			goto again
+		} else {
+			log.Printf("FAILED to connect to %s; giving up from dial backoff", pi.ID.Pretty())
+		}
+	case err != nil:
 		log.Printf("FAILED to connect to %s: %s", pi.ID.Pretty(), err.Error())
-	} else {
+	default:
 		log.Printf("CONNECTED to %s", pi.ID.Pretty())
 	}
 }

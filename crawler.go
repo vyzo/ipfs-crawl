@@ -2,9 +2,10 @@ package main
 
 import (
 	"context"
-	"crypto/rand"
+	crand "crypto/rand"
 	"encoding/base64"
 	"log"
+	mrand "math/rand"
 	"time"
 
 	host "github.com/libp2p/go-libp2p-host"
@@ -41,7 +42,7 @@ func (c *Crawler) Crawl() {
 	anchor := make([]byte, 32)
 	for {
 
-		_, err := rand.Read(anchor)
+		_, err := crand.Read(anchor)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -60,12 +61,21 @@ func (c *Crawler) Crawl() {
 func (c *Crawler) crawlFromAnchor(key string) {
 	log.Printf("Crawling from anchor %s\n", key)
 
-	pch, err := c.dht.GetClosestPeers(c.ctx, key)
+	ctx, cancel := context.WithTimeout(c.ctx, 60*time.Second)
+	pch, err := c.dht.GetClosestPeers(ctx, key)
+
 	if err != nil {
 		log.Fatal(err)
 	}
 
+	var ps []peer.ID
 	for p := range pch {
+		ps = append(ps, p)
+	}
+	cancel()
+
+	log.Printf("Found %d peers", len(ps))
+	for _, p := range ps {
 		c.crawlPeer(p)
 	}
 }
@@ -96,15 +106,23 @@ func (c *Crawler) crawlPeer(p peer.ID) {
 
 	ctx, cancel = context.WithTimeout(c.ctx, 60*time.Second)
 	pch, err := c.dht.FindPeersConnectedToPeer(ctx, p)
-	cancel()
 
 	if err != nil {
 		log.Printf("Can't find peers connected to peer %s: %s", p.Pretty(), err.Error())
+		cancel()
 		return
 	}
 
+	var ps []peer.ID
 	for pip := range pch {
-		c.crawlPeer(pip.ID)
+		ps = append(ps, pip.ID)
+	}
+	cancel()
+
+	log.Printf("Peer %s is connected to %d peers", p.Pretty(), len(ps))
+
+	for _, p := range ps {
+		c.crawlPeer(p)
 	}
 }
 
@@ -115,6 +133,9 @@ func (c *Crawler) worker() {
 			if !ok {
 				return
 			}
+			// add a bit of delay to avoid dial backoffs
+			dt := mrand.Intn(60000)
+			time.Sleep(time.Duration(dt) * time.Millisecond)
 			c.tryConnect(pi)
 
 		case <-c.ctx.Done():

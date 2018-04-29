@@ -1,0 +1,39 @@
+{
+  "author": "vyzo",
+  "bugs": {},
+  "gx": {
+    "dvcsimport": "github.com/vyzo/ipfs-crawl"
+  },
+  "gxDependencies": [
+    {
+      "author": "whyrusleeping",
+      "hash": "QmWsV6kzPaYGBDVyuUfWBvyQygEc9Qrv9vzo8vZ7X4mdLN",
+      "name": "go-libp2p",
+      "version": "5.0.17"
+    },
+    {
+      "author": "jbenet",
+      "hash": "QmeiCcJfDW1GJnWUArudsv5rQsihpi4oyddPhdqo3CfX6i",
+      "name": "go-datastore",
+      "version": "2.4.1"
+    },
+    {
+      "hash": "QmT9TxakNKCHg3uBcLnNzBSBhhACvqH8tRzJvYZjUevrvE",
+      "name": "go-libp2p-kad-dht",
+      "version": "4.0.2"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmfZTdmunzKzAGJrSvXXQbQ5kLLUiEMX5vdwux7iXkdk7D",
+      "name": "go-libp2p-host",
+      "version": "2.1.7"
+    }
+  ],
+  "gxVersion": "0.12.1",
+  "language": "go",
+  "license": "",
+  "name": "ipfs-crawl",
+  "releaseCmd": "git commit -a -m \"gx publish $VERSION\"",
+  "version": "0.0.0"
+}
+

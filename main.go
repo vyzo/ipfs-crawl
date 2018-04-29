@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	ds "github.com/ipfs/go-datastore"
 	ds_sync "github.com/ipfs/go-datastore/sync"
@@ -30,6 +31,11 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// wait a bit for the bootstrap
+	log.Printf("Waiting a minute for DHT bootstrap...")
+	time.Sleep(1 * time.Minute)
+	log.Printf("GO crawler GO!")
 
 	c.Crawl()
 }

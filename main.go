@@ -15,6 +15,11 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	out, err := NewCrawlLog("ipfs-crawl.out")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	h, err := libp2p.New(ctx)
 	if err != nil {
 		log.Fatal(err)
@@ -25,7 +30,7 @@ func main() {
 	dstore := ds_sync.MutexWrap(ds.NewMapDatastore())
 	dht := dht.NewDHTClient(ctx, h, dstore)
 
-	c := NewCrawler(ctx, h, dht)
+	c := NewCrawler(ctx, h, dht, out)
 
 	err = c.Bootstrap()
 	if err != nil {

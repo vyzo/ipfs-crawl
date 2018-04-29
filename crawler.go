@@ -21,13 +21,14 @@ type Crawler struct {
 	ctx context.Context
 	h   host.Host
 	dht *dht.IpfsDHT
+	out *CrawlLog
 
 	peers map[peer.ID]struct{}
 	work  chan pstore.PeerInfo
 }
 
-func NewCrawler(ctx context.Context, h host.Host, dht *dht.IpfsDHT) *Crawler {
-	c := &Crawler{ctx: ctx, h: h, dht: dht,
+func NewCrawler(ctx context.Context, h host.Host, dht *dht.IpfsDHT, out *CrawlLog) *Crawler {
+	c := &Crawler{ctx: ctx, h: h, dht: dht, out: out,
 		peers: make(map[peer.ID]struct{}),
 		work:  make(chan pstore.PeerInfo, WORKERS),
 	}
@@ -146,13 +147,12 @@ func (c *Crawler) worker() {
 }
 
 func (c *Crawler) tryConnect(pi pstore.PeerInfo) {
-	log.Printf("Connecting to %s (%d)", pi.ID.Pretty(), len(pi.Addrs))
-
 	backoff := 0
 	var ctx context.Context
 	var cancel func()
 
 again:
+	log.Printf("Connecting to %s (%d)", pi.ID.Pretty(), len(pi.Addrs))
 	ctx, cancel = context.WithTimeout(c.ctx, 60*time.Second)
 
 	err := c.h.Connect(ctx, pi)
@@ -171,7 +171,9 @@ again:
 		}
 	case err != nil:
 		log.Printf("FAILED to connect to %s: %s", pi.ID.Pretty(), err.Error())
+		c.out.LogError(pi, err)
 	default:
 		log.Printf("CONNECTED to %s", pi.ID.Pretty())
+		c.out.LogConnect(pi)
 	}
 }

@@ -1,5 +1,5 @@
 
-This is a quick&dirty ipfs dht crawler, writtent to diagnose
+This is a simple ipfs dht crawler, written to diagnose
 connectivity issues in the network.
 
 To build:

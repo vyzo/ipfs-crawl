@@ -1,5 +1,5 @@
 bin: deps
-	go build
+	go install
 
 deps: gx
 	gx --verbose install --global

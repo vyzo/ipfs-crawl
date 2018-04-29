@@ -88,7 +88,11 @@ func (c *Crawler) crawlPeer(p peer.ID) {
 	}
 
 	c.peers[p] = struct{}{}
-	c.work <- pi
+	select {
+	case c.work <- pi:
+	case <-c.ctx.Done():
+		return
+	}
 
 	ctx, cancel = context.WithTimeout(c.ctx, 60*time.Second)
 	pch, err := c.dht.FindPeersConnectedToPeer(ctx, p)

@@ -24,7 +24,7 @@ type CrawlRecord struct {
 }
 
 func NewCrawlLog(path string) (*CrawlLog, error) {
-	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE, 0644)
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
 	if err != nil {
 		return nil, err
 	}

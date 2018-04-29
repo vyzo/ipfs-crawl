@@ -27,6 +27,18 @@
       "hash": "QmfZTdmunzKzAGJrSvXXQbQ5kLLUiEMX5vdwux7iXkdk7D",
       "name": "go-libp2p-host",
       "version": "2.1.7"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmcJukH2sAFjY3HdBKq35WDzWoL3UUu2gt9wdfqZTUyM74",
+      "name": "go-libp2p-peer",
+      "version": "2.3.2"
+    },
+    {
+      "author": "whyrusleeping",
+      "hash": "QmdeiKhUy1TVGBaKxt7y1QmBDLBdisSrLJ1x58Eoj4PXUh",
+      "name": "go-libp2p-peerstore",
+      "version": "1.4.17"
     }
   ],
   "gxVersion": "0.12.1",

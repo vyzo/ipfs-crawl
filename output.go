@@ -62,5 +62,10 @@ func peerInfoToCrawlRecord(pi pstore.PeerInfo, ca ma.Multiaddr, status, e string
 		addrs[i] = a.String()
 	}
 
-	return CrawlRecord{ID: pi.ID.Pretty(), Addrs: addrs, Status: status, Error: e, ConAddr: ca.String()}
+	var cas string
+	if ca != nil {
+		cas = ca.String()
+	}
+
+	return CrawlRecord{ID: pi.ID.Pretty(), Addrs: addrs, Status: status, Error: e, ConAddr: cas}
 }

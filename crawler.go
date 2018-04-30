@@ -161,7 +161,7 @@ again:
 	switch {
 	case err == swarm.ErrDialBackoff:
 		backoff++
-		if backoff < 10 {
+		if backoff < 7 {
 			dt := 1000 + mrand.Intn(backoff*10000)
 			log.Printf("Backing off dialing %s", pi.ID.Pretty())
 			time.Sleep(time.Duration(dt) * time.Millisecond)

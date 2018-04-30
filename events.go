@@ -2,21 +2,22 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
+	"log"
 	"time"
 )
 
 type PeerDialLog struct {
-	Dials   []DialAttempt
-	Success bool
+	Dials    []DialAttempt `json:"dials"`
+	Success  bool          `json:"success"`
+	Duration string        `json:"duration"`
 }
 
 type DialAttempt struct {
-	TargetAddr string
-	Result     string
-	Error      string
-	Duration   string
+	TargetAddr string `json:"targetAddr"`
+	Result     string `json:"result"`
+	Error      string `json:"error,omitempty"`
+	Duration   string `json:"duration"`
 }
 
 type dialLog struct {
@@ -68,15 +69,6 @@ func handleEvents(r io.Reader) {
 			}
 
 			pdl.Dials = append(pdl.Dials, datt)
-
-			/*// TEMP
-			data, err := json.Marshal(datt)
-			if err != nil {
-				panic(err)
-			}
-
-			fmt.Println(string(data))
-			// TEMP */
 		case "swarmDialAttemptSync":
 			// this event tracks the entire life of a dial to a peer
 			// It looks something like:
@@ -84,8 +76,22 @@ func handleEvents(r io.Reader) {
 				map[duration:1.396019259e+09 event:swarmDialAttemptSync peerID:QmaCpDMGvV2BGHeYERUEnRQAwe3N8SzbUtfsmvsqQLuvuJ system:swarm2 time:2018-04-30T08:59:24.772706819Z
 			*/
 			// we should use this as a trigger to write out to the logfile this particular dial event
+			p := ev["peerID"].(string)
+			pdl, ok := dialLog.peers[p]
+			if !ok {
+				break
+			}
+			delete(dialLog.peers, p)
+			dur := ev["duration"].(float64)
+			pdl.Duration = time.Duration(dur).String()
 
-			fmt.Println(ev)
+			data, err := json.Marshal(pdl)
+			if err != nil {
+				panic(err)
+			}
+
+			// print to log file
+			log.Println(string(data))
 		}
 	}
 }

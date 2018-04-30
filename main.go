@@ -2,13 +2,11 @@ package main
 
 import (
 	"context"
-	"io"
 	"log"
 	"time"
 
 	ds "github.com/ipfs/go-datastore"
 	ds_sync "github.com/ipfs/go-datastore/sync"
-	logging "github.com/ipfs/go-log"
 	libp2p "github.com/libp2p/go-libp2p"
 	dht "github.com/libp2p/go-libp2p-kad-dht"
 )
@@ -17,14 +15,10 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	el, err := NewEventsLogger("crawl-events.json")
+	_, err := NewEventsLogger("crawl-events.json")
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-
-	r, w := io.Pipe()
-	go el.handleEvents(r)
-	logging.WriterGroup.AddWriter(w)
 
 	out, err := NewCrawlLog("ipfs-crawl.out")
 	if err != nil {

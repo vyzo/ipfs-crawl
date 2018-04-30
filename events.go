@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"time"
+
+	logging "github.com/ipfs/go-log"
 )
 
 type PeerDialLog struct {
@@ -34,11 +36,17 @@ func NewEventsLogger(path string) (*EventsLogger, error) {
 
 	enc := json.NewEncoder(f)
 
-	return &EventsLogger{
+	el := &EventsLogger{
 		fi:    f,
 		enc:   enc,
 		peers: make(map[string]*PeerDialLog),
-	}, nil
+	}
+
+	r, w := io.Pipe()
+	go el.handleEvents(r)
+	logging.WriterGroup.AddWriter(w)
+
+	return el, nil
 }
 
 func (el *EventsLogger) handleEvents(r io.Reader) {

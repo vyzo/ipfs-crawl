@@ -10,6 +10,7 @@ import (
 )
 
 type PeerDialLog struct {
+	Peer     string        `json:"peer"`
 	Dials    []DialAttempt `json:"dials"`
 	Success  bool          `json:"success"`
 	Duration string        `json:"duration"`
@@ -67,7 +68,7 @@ func (el *EventsLogger) handleEvents(r io.Reader) {
 
 			pdl, ok := el.peers[rpeer]
 			if !ok {
-				pdl = new(PeerDialLog)
+				pdl = &PeerDialLog{Peer: rpeer}
 				el.peers[rpeer] = pdl
 			}
 

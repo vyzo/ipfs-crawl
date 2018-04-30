@@ -15,6 +15,11 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	_, err := NewEventsLogger("ipfs-crawl-events.json")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	out, err := NewCrawlLog("ipfs-crawl.out")
 	if err != nil {
 		log.Fatal(err)

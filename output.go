@@ -19,7 +19,7 @@ type CrawlLog struct {
 
 type CrawlRecord struct {
 	ID      string   `json:"id"`
-	ConAddr string   `json:"conaddr"`
+	ConAddr string   `json:"conaddr,omitempty"`
 	Addrs   []string `json:"addrs"`
 	Status  string   `json:"status"`
 	Error   string   `json:"error,omitempty"`

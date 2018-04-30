@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	pstore "github.com/libp2p/go-libp2p-peerstore"
+	ma "github.com/multiformats/go-multiaddr"
 )
 
 type CrawlLog struct {
@@ -17,10 +18,11 @@ type CrawlLog struct {
 }
 
 type CrawlRecord struct {
-	ID     string   `json:"id"`
-	Addrs  []string `json:"addrs"`
-	Status string   `json:"status"`
-	Error  string   `json:"error,omitempty"`
+	ID      string   `json:"id"`
+	ConAddr string   `json:"conaddr"`
+	Addrs   []string `json:"addrs"`
+	Status  string   `json:"status"`
+	Error   string   `json:"error,omitempty"`
 }
 
 func NewCrawlLog(path string) (*CrawlLog, error) {
@@ -34,11 +36,11 @@ func NewCrawlLog(path string) (*CrawlLog, error) {
 	return &CrawlLog{f: f, w: enc}, nil
 }
 
-func (o *CrawlLog) LogConnect(pi pstore.PeerInfo) {
+func (o *CrawlLog) LogConnect(ca ma.Multiaddr, pi pstore.PeerInfo) {
 	o.mx.Lock()
 	defer o.mx.Unlock()
 
-	err := o.w.Encode(peerInfoToCrawlRecord(pi, "OK", ""))
+	err := o.w.Encode(peerInfoToCrawlRecord(pi, ca, "OK", ""))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -48,17 +50,17 @@ func (o *CrawlLog) LogError(pi pstore.PeerInfo, e error) {
 	o.mx.Lock()
 	defer o.mx.Unlock()
 
-	err := o.w.Encode(peerInfoToCrawlRecord(pi, "ERROR", e.Error()))
+	err := o.w.Encode(peerInfoToCrawlRecord(pi, nil, "ERROR", e.Error()))
 	if err != nil {
 		log.Fatal(err)
 	}
 }
 
-func peerInfoToCrawlRecord(pi pstore.PeerInfo, status, e string) CrawlRecord {
+func peerInfoToCrawlRecord(pi pstore.PeerInfo, ca ma.Multiaddr, status, e string) CrawlRecord {
 	addrs := make([]string, len(pi.Addrs))
 	for i, a := range pi.Addrs {
 		addrs[i] = a.String()
 	}
 
-	return CrawlRecord{ID: pi.ID.Pretty(), Addrs: addrs, Status: status, Error: e}
+	return CrawlRecord{ID: pi.ID.Pretty(), Addrs: addrs, Status: status, Error: e, ConAddr: ca.String()}
 }

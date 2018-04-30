@@ -95,7 +95,7 @@ func (c *Crawler) crawlPeer(p peer.ID) {
 	cancel()
 
 	if err != nil {
-		log.Printf("Peer not found: %s", p.Pretty())
+		log.Printf("Peer not found %s: %s", p.Pretty(), err.Error())
 		return
 	}
 
@@ -161,13 +161,14 @@ again:
 	switch {
 	case err == swarm.ErrDialBackoff:
 		backoff++
-		if backoff < 7 {
+		if backoff < 10 {
 			dt := 1000 + mrand.Intn(backoff*10000)
 			log.Printf("Backing off dialing %s", pi.ID.Pretty())
 			time.Sleep(time.Duration(dt) * time.Millisecond)
 			goto again
 		} else {
 			log.Printf("FAILED to connect to %s; giving up from dial backoff", pi.ID.Pretty())
+			c.out.LogError(pi, err)
 		}
 	case err != nil:
 		log.Printf("FAILED to connect to %s: %s", pi.ID.Pretty(), err.Error())

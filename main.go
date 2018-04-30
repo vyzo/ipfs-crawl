@@ -17,8 +17,13 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
+	el, err := NewEventsLogger("crawl-events.json")
+	if err != nil {
+		panic(err)
+	}
+
 	r, w := io.Pipe()
-	go handleEvents(r)
+	go el.handleEvents(r)
 	logging.WriterGroup.AddWriter(w)
 
 	out, err := NewCrawlLog("ipfs-crawl.out")

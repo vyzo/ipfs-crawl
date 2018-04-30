@@ -3,7 +3,7 @@ package main
 import (
 	"encoding/json"
 	"io"
-	"log"
+	"os"
 	"time"
 )
 
@@ -20,14 +20,28 @@ type DialAttempt struct {
 	Duration   string `json:"duration"`
 }
 
-type dialLog struct {
+type EventsLogger struct {
+	fi    *os.File
+	enc   *json.Encoder
 	peers map[string]*PeerDialLog
 }
 
-func handleEvents(r io.Reader) {
-	dialLog := &dialLog{
-		peers: make(map[string]*PeerDialLog),
+func NewEventsLogger(path string) (*EventsLogger, error) {
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0644)
+	if err != nil {
+		return nil, err
 	}
+
+	enc := json.NewEncoder(f)
+
+	return &EventsLogger{
+		fi:    f,
+		enc:   enc,
+		peers: make(map[string]*PeerDialLog),
+	}, nil
+}
+
+func (el *EventsLogger) handleEvents(r io.Reader) {
 
 	dec := json.NewDecoder(r)
 	for {
@@ -43,10 +57,10 @@ func handleEvents(r io.Reader) {
 				panic("remotePeer field not set")
 			}
 
-			pdl, ok := dialLog.peers[rpeer]
+			pdl, ok := el.peers[rpeer]
 			if !ok {
 				pdl = new(PeerDialLog)
-				dialLog.peers[rpeer] = pdl
+				el.peers[rpeer] = pdl
 			}
 
 			if ev["dial"] == "success" {
@@ -77,21 +91,17 @@ func handleEvents(r io.Reader) {
 			*/
 			// we should use this as a trigger to write out to the logfile this particular dial event
 			p := ev["peerID"].(string)
-			pdl, ok := dialLog.peers[p]
+			pdl, ok := el.peers[p]
 			if !ok {
 				break
 			}
-			delete(dialLog.peers, p)
+			delete(el.peers, p)
 			dur := ev["duration"].(float64)
 			pdl.Duration = time.Duration(dur).String()
 
-			data, err := json.Marshal(pdl)
-			if err != nil {
+			if err := el.enc.Encode(pdl); err != nil {
 				panic(err)
 			}
-
-			// print to log file
-			log.Println(string(data))
 		}
 	}
 }

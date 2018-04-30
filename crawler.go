@@ -174,6 +174,11 @@ again:
 		c.out.LogError(pi, err)
 	default:
 		log.Printf("CONNECTED to %s", pi.ID.Pretty())
-		c.out.LogConnect(pi)
+		conns := c.h.Network().ConnsToPeer(pi.ID)
+		if len(conns) == 0 {
+			log.Printf("ERROR: supposedly connected, but no conns to peer", pi.ID.Pretty())
+		} else {
+			c.out.LogConnect(conns[0].RemoteMultiaddr(), pi)
+		}
 	}
 }

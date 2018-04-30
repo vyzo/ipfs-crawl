@@ -88,7 +88,7 @@ func (c *Crawler) crawlPeer(p peer.ID) {
 		return
 	}
 
-	log.Printf("Crawling peer %s\n", p.Pretty())
+	log.Printf("Crawling peer %s", p.Pretty())
 
 	ctx, cancel := context.WithTimeout(c.ctx, 60*time.Second)
 	pi, err := c.dht.FindPeer(ctx, p)

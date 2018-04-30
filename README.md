@@ -14,7 +14,8 @@ ipfs-crawl
 
 This will run indefinitely and generate a file `ipfs-crawl.out` in the
 current directory, logging (in json) the results of connection attemps
-to peers discovered during the crawl.
+to peers discovered during the crawl. A detailed dial event log will
+be written in `ipfs-crawl-events.json`.
 
 Note: You should make sure your file descriptor ulimit is sufficiently
 high to potentially connect to all the reachable peers. The network is

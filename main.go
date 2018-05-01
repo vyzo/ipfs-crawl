@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"log"
 	"time"
 
@@ -12,12 +13,17 @@ import (
 )
 
 func main() {
+	logDial := flag.Bool("log-dial", false, "Log dial events in ipfs-crawl-events.json")
+	flag.Parse()
+
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	_, err := NewEventsLogger("ipfs-crawl-events.json")
-	if err != nil {
-		log.Fatal(err)
+	if *logDial {
+		_, err := NewEventsLogger("ipfs-crawl-events.json")
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	out, err := NewCrawlLog("ipfs-crawl.out")

@@ -14,8 +14,14 @@ ipfs-crawl
 
 This will run indefinitely and generate a file `ipfs-crawl.out` in the
 current directory, logging (in json) the results of connection attemps
-to peers discovered during the crawl. A detailed dial event log will
-be written in `ipfs-crawl-events.json`.
+to peers discovered during the crawl.
+
+If you want detailed dial logs, then invoke the crawler with:
+```
+ipfs-crawl -log-dial
+```
+This will log all dial events to `ipfs-crawl-events.json` in the current
+directory.
 
 Note: You should make sure your file descriptor ulimit is sufficiently
 high to potentially connect to all the reachable peers. The network is

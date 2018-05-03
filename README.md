@@ -21,7 +21,7 @@ If you want detailed dial logs, then invoke the crawler with:
 ipfs-crawl -log-dial
 ```
 This will log all dial events to `ipfs-crawl-events.json` in the current
-directory.
+directory. But see issue #4 for a wart.
 
 Note: You should make sure your file descriptor ulimit is sufficiently
 high to potentially connect to all the reachable peers. The network is
